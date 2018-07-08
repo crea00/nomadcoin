@@ -1,0 +1,10 @@
+{
+  "name": "nomadcoin",
+  "version": "1.0.0",
+  "description": "Nomadcoin, the most awesome coin made in NodeJS",
+  "main": "src/server.js",
+  "repository": "https://github.com/crea00/nomadcoin",
+  "author": "crea <654321su@gmail.com>",
+  "license": "MIT",
+  "private": false
+}
