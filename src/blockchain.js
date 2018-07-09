@@ -13,10 +13,18 @@ const genesisBlock = new Blcok(
   0,
   "E5B9D14256F1684580288FECDEFB5095390D901A43AC7C44428E59EEB5A84C18",
   null,
-  1531094133.16,    //new Date().getTime / 1000
+  1531094133.16,    //new Date().getTime() / 1000
   "This is the genesis!!"
 );
 
 let blockchain = [genesisBlock];
 
-console.log(blockchain);
+const getLastBlock = () => blockchain[blockchain.length -1 ];
+
+const getTimestamp = () => new Date().getTime() / 1000;
+
+const createNewBlock = data => {
+  const previousBlock = getLastBlock();
+  const newBlockIndex = previousBlock.index + 1;
+  const newTimestamp = getTimestamp();
+};
