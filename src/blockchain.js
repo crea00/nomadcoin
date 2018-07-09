@@ -21,7 +21,7 @@ const genesisBlock = new Block(
 
 let blockchain = [genesisBlock];
 
-const getLastBlock = () => blockchain[blockchain.length -1 ];
+const getLastBlock = () => blockchain[blockchain.length - 1];
 
 const getTimestamp = () => new Date().getTime() / 1000;
 
@@ -35,9 +35,9 @@ const createNewBlock = data => {
   const newBlockIndex = previousBlock.index + 1;
   const newTimestamp = getTimestamp();
   const newHash = createHash(
-    newBlockIndex, 
-    previousBlock.hash, 
-    newTimestamp, 
+    newBlockIndex,
+    previousBlock.hash,
+    newTimestamp,
     data
   );
   const newBlock = new Block(
@@ -51,7 +51,7 @@ const createNewBlock = data => {
   return newBlock;
 };
 
-const getBlocksHash = (block) => createHash(block.index, block.previousHash, block.timestamp, block.data);
+const getBlocksHash = block => createHash(block.index, block.previousHash, block.timestamp, block.data);
 
 const isNewBlockValid = (candidateBlock, latestBlock) => {
   if(!isNewStructureValid(candidateBlock)) {
@@ -70,13 +70,13 @@ const isNewBlockValid = (candidateBlock, latestBlock) => {
   return true;
 };
 
-const isNewStructureValid = () => {
+const isNewStructureValid = block => {
   return (
-    typeof block.idnex === 'number' &&
-    typeof block.hash === 'string' &&
-    typeof block.previousHash === 'string' &&
-    typeof block.timestamp === 'number' && 
-    typeof block.data === 'string'
+    typeof block.index === "number" &&
+    typeof block.hash === "string" &&
+    typeof block.previousHash === "string" &&
+    typeof block.timestamp === "number" &&
+    typeof block.data === "string"
   );
 };
 
@@ -110,7 +110,7 @@ const replaceChain = candidateChain => {
 
 const addBlockToChain = candidateBlock => {
   if(isNewBlockValid(candidateBlock, getLastBlock())) {
-    getBlockchain().push(candidateBlock);
+    blockchain.push(candidateBlock);
     return true;
   } else {
     return false;
