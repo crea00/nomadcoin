@@ -80,7 +80,7 @@ const isNewStructureValid = block => {
   );
 };
 
-const isChainValid = (candidateChain) => {
+const isChainValid = candidateChain => {
   const isGenesisValid = block => {
     return JSON.stringify(block) === JSON.stringify(genesisBlock);
   };
