@@ -48,6 +48,8 @@ const createNewBlock = data => {
     data
   );
   addBlockToChain(newBlock);
+  // Circular dependency가 생기는 것을 막기위해 
+  require("./p2p").broadcastNewBlock();
   return newBlock;
 };
 
@@ -118,9 +120,9 @@ const addBlockToChain = candidateBlock => {
 };
 
 module.exports = {
+  getNewestBlock,
   getBlockchain,
   createNewBlock,
-  getNewestBlock,
   isBlockStructureValid,
   addBlockToChain,
   replaceChain
