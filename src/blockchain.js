@@ -1,12 +1,14 @@
 const CryptoJS = require("crypto-js");
 
 class Block {
-  constructor(index, hash, previousHash, timestamp, data) {
+  constructor(index, hash, previousHash, timestamp, data, difficulty, nonce) {
     this.index = index;
     this.hash = hash;
     this.previousHash = previousHash;
     this.timestamp = timestamp;
     this.data = data;
+    this.difficulty = difficulty;
+    this.nonce = nonce;
   }
 }
 
@@ -16,7 +18,9 @@ const genesisBlock = new Block(
   "E5B9D14256F1684580288FECDEFB5095390D901A43AC7C44428E59EEB5A84C18",
   null,
   1531094133.16,    //new Date().getTime() / 1000
-  "This is the genesis!!"
+  "This is the genesis!!",
+  0,
+  0
 );
 
 let blockchain = [genesisBlock];
@@ -27,7 +31,7 @@ const getTimestamp = () => new Date().getTime() / 1000;
 
 const getBlockchain = () => blockchain;
 
-const createHash = (index, previousHash, timestamp, data) =>
+const createHash = (index, previousHash, timestamp, data, difficulty, nonce) =>
   CryptoJS.SHA256(index + previousHash + timestamp + JSON.stringify(data)).toString();
 
 const createNewBlock = data => {
@@ -40,9 +44,8 @@ const createNewBlock = data => {
     newTimestamp,
     data
   );
-  const newBlock = new Block(
+  const newBlock = new findBlock(
     newBlockIndex,
-    newHash,
     previousBlock.hash,
     newTimestamp,
     data
@@ -51,6 +54,26 @@ const createNewBlock = data => {
   // Circular dependency가 생기는 것을 막기위해 
   require("./p2p").broadcastNewBlock();
   return newBlock;
+};
+
+const findBlock = (index, previousHash, timestamp, data, difficulty) => {
+  let nonce = 0;
+  // Infinite loop
+  while (true) {
+    const hash = createHash(
+      index,
+      previousHash,
+      data,
+      difficulty,
+      nonce
+    );
+    // to do: check amount of zeros (hashMatchesDifficulty)
+    if () {
+
+    } else {
+      nonce++;
+    }
+  }
 };
 
 const getBlocksHash = block => createHash(block.index, block.previousHash, block.timestamp, block.data);
