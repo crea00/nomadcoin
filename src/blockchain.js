@@ -60,13 +60,30 @@ const findDifficulty = () => {
   const newestBlock = getNewestBlock();
   if (
     newestBlock.index % DIFFICULTY_ADJUSTMENT_INTERVAL === 0
-    && newBlock.index !== 0
+    && newestBlock.index !== 0
   ) {
     // calculate new difficulty
+    return calculateNewDifficulty(newestBlock, getBlockchain());
   } else {
     return newestBlock.difficulty;
   }
-}
+};
+
+const calculateNewDifficulty = (newestBlock, blockchain) => {
+  const lastCalculatedBlock =
+    blockchain[blockchain.length - DIFFICULTY_ADJUSTMENT_INTERVAL];
+  const timeExpected =
+    BLOCK_GENERATION_INTERVAL * DIFFICULTY_ADJUSTMENT_INTERVAL;
+  const timeTaken = newestBlock.timestamp - lastCalculatedBlock.timestamp;
+  if (timeTaken < timeExpected / 2) {
+    return lastCalculatedBlock.difficulty + 1;
+  } else if (timeTaken > timeExpected * 2) {
+    return lastCalculatedBlock.difficulty - 1;
+  } else {
+    return lastCalculatedBlock.difficulty;
+  }
+};
+
 
 const findBlock = (index, previousHash, timestamp, data, difficulty) => {
   let nonce = 0;
@@ -76,6 +93,7 @@ const findBlock = (index, previousHash, timestamp, data, difficulty) => {
     const hash = createHash(
       index,
       previousHash,
+      timestamp,
       data,
       difficulty,
       nonce
@@ -103,7 +121,15 @@ const hashMatchesDifficulty = (hash, difficulty) => {
   return hashInBinary.startsWith(requiredZeros);
 };
 
-const getBlocksHash = block => createHash(block.index, block.previousHash, block.timestamp, block, block.difficulty, block.nonce);
+const getBlocksHash = block =>
+  createHash(
+    block.index,
+    block.previousHash,
+    block.timestamp,
+    block.data,
+    block.difficulty,
+    block.nonce
+  );
 
 const isBlockValid = (candidateBlock, latestBlock) => {
   if (!isBlockStructureValid(candidateBlock)) {
