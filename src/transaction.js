@@ -1,7 +1,8 @@
-const CryptoJS = require("crypto-js")
-elliptic = require("elliptic");
+const CryptoJS = require("crypto-js"),
+  elliptic = require("elliptic"),
+  utils = require("./utils");
 
-const ec = new ec("secp256k1");
+const ec = new elliptic.ec("secp256k1");
 
 class TxOut {
   constructor(address, amount) {
@@ -13,7 +14,7 @@ class TxOut {
 class TxIn {
   // uTxOutId
   // uTxOutIndex
-  // Singnature
+  // Signature
 }
 
 class Transaction {
@@ -61,4 +62,7 @@ const signTxIn = (tx, txInIndex, privateKey, uTxOut) => {
     return;
   }
   // To Do: Sign the txIn
+  const key = ec.keyFromPrivate(privateKey, "hex");
+  const signature = utils.toHexString(key.sign(dataToSign).toDER());
+  return signature;
 };
