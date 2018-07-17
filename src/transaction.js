@@ -1,4 +1,7 @@
-const CryptoJS = require("crypto-js");
+const CryptoJS = require("crypto-js")
+elliptic = require("elliptic");
+
+const ec = new ec("secp256k1");
 
 class TxOut {
   constructor(address, amount) {
@@ -42,3 +45,12 @@ const getTxId = tx => {
   return CryptoJS.SHA256(txInContent + txOutContent).toString();
 };
 
+const signTxIn = (tx, txInIndex, privateKey, uTxOut) => {
+  const txIn = tx.txIns[txInIndex];
+  const dataToSign = tx.id;
+  // To Do: Find Tx
+  const referencedTxOut = null;
+  if (referencedTxOut === null) {
+    return;
+  }
+};
