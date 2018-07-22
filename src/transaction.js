@@ -74,10 +74,17 @@ const updateUTxOuts = (newTxs, uTxOutList) => {
         new UTxOut(tx.id, index, txOut.address, txOut.amount);
       });
     })
-    .reduce((a, b) => a.contact(b), []);
+    .reduce((a, b) => a.concat(b), []);
 
   const spentTxOuts = newTxs
     .map(tx => tx.txIns)
-    .reduce((a, b) => a.contact(b), [])
+    .reduce((a, b) => a.concat(b), [])
     .map(txIn => new UTxOut(txIn, txOutId, txIn.txOutIndex, "", 0));
+
+  const resultingUTxOuts = uTxOutList
+    .filter(uTxO => !findUTxOut(uTxO.txOutId, utxo.txOutIndex, spentTxOuts))
+    .concat(newUTxOuts);
+
+  return resultingUTxOuts;
 };
+
