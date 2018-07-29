@@ -162,7 +162,10 @@ const validateTxIn = (txIn, tx, uTxOutList) => {
     const key = ec.keyFromPublic(address, "hex");
     return key.verify(tx.id, txIn.signature);
   }
-}
+};
+
+const getAmountInTxIn = (txIn, uTxOutList) =>
+  findUTxOut(txIn.txOutId, txIn.txOutIndex, uTxOutList).amount;
 
 const validateTx = (tx, uTxOutList) => {
   if (getTxId(tx) !== tx.id) {
@@ -175,9 +178,13 @@ const validateTx = (tx, uTxOutList) => {
     return false;
   }
 
-  const amountInTxIns = // todo
+  const amountInTxIns = tx.txIns
+    .map(txIn => getAmountInTxIn(txIn, uTxOutList))
+    .reduce((a, b) => a + b, 0);
 
-  const amountInTxOuts = // todo
+  const amountInTxOuts = tx.txOuts
+    .map(txOut => txOut.amount)
+    .reduce((a, b) => a + b, 0);
 
   if (amountInTxIns !== amountInTxOuts) {
     return false;
