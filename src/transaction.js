@@ -152,3 +152,27 @@ const isTxStructureValid = (tx) => {
     return true;
   }
 };
+
+const validateTx = (tx, uTxOutList) => {
+  if (getTxId(tx) !== tx.id) {
+    return false;
+  }
+
+
+  const hasValidTxIns = // todo
+
+
+  if (!hasValidTxIns) {
+    return;
+  }
+
+  const amountInTxIns = // todo
+
+  const amountInTxOuts = // todo
+
+  if (amountInTxIns !== amountInTxOuts) {
+    return false;
+  } else {
+    return false;
+  }
+};
