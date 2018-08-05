@@ -226,3 +226,9 @@ const validateCoinbaseTx = (tx, blockIndex) => {
     return true;
   }
 };
+
+module.exports = {
+  getPublicKey,
+  getTxId,
+  signTxIn
+};
