@@ -9,6 +9,7 @@ const { getBlockchain, createNewBlock, getAccountBalance } = Blockchain;
 const { startP2PServer, connectToPeers } = P2P;
 const { initWallet } = Wallet;
 
+// Don't forget about typing 'export HTTP_PORT=4000' in your console
 const PORT = process.env.HTTP_PORT || 3000;
 
 const app = express();
@@ -16,13 +17,12 @@ app.use(bodyParser.json());
 app.use(morgan("combined"));
 
 app
-  .route("./blocks")
+  .route("/blocks")
   .get((req, res) => {
     res.send(getBlockchain());
   })
   .post((req, res) => {
-    const { body: { data } } = req;
-    const newBlock = createNewBlock(data);
+    const newBlock = createNewBlock();
     res.send(newBlock);
   });
 
