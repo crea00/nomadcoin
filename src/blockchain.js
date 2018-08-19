@@ -1,11 +1,20 @@
 const CryptoJS = require("crypto-js"),
+  _ = require("lodash"),
   Wallet = require("./wallet"),
+  Mempool = require("./mempool"),
   Transactions = require("./transactions"),
   hexToBinary = require("hex-to-binary");
 
-const { getBalance, getPublicFromWallet } = Wallet;
+const {
+  getBalance,
+  getPublicFromWallet,
+  createTx,
+  getPrivateFromWallet
+} = Wallet;
 
 const { createCoinbaseTx, processTxs } = Transactions;
+
+const { addToMempool } = Mempool;
 
 const BLOCK_GENERATION_INTERVAL = 10;
 const DIFFICULTY_ADJUSTMENT_INTERVAL = 10;
@@ -167,7 +176,7 @@ const isBlockValid = (candidateBlock, latestBlock) => {
   } else if (getBlocksHash(candidateBlock) !== candidateBlock.hash) {
     console.log("The hash of this block is invalid");
     return false;
-  } else if (!isTimeStampValid(candidateBlock, latestBlock)) {
+  } else if (!isTimeStampValid(canidateBlock, latestBlock)) {
     console.log("The timestamp of this block is dodgy");
     return false;
   }
@@ -242,8 +251,15 @@ const addBlockToChain = candidateBlock => {
   }
 };
 
+const getUTxOutList = () => _.cloneDeep(uTxOuts);
+
 const getAccountBalance = () =>
   getBalance(getPublicFromWallet(), uTxOuts);
+
+const sendTx = (adderss, amount) => {
+  const tx = createTx(adderss, amount, getPrivateFromWallet(), getUTxOutList());
+  addToMempool(tx, getUTxOutList());
+};
 
 module.exports = {
   getNewestBlock,
