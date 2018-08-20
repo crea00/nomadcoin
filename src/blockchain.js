@@ -176,7 +176,7 @@ const isBlockValid = (candidateBlock, latestBlock) => {
   } else if (getBlocksHash(candidateBlock) !== candidateBlock.hash) {
     console.log("The hash of this block is invalid");
     return false;
-  } else if (!isTimeStampValid(canidateBlock, latestBlock)) {
+  } else if (!isTimeStampValid(candidateBlock, latestBlock)) {
     console.log("The timestamp of this block is dodgy");
     return false;
   }
@@ -268,5 +268,6 @@ module.exports = {
   isBlockStructureValid,
   addBlockToChain,
   replaceChain,
-  getAccountBalance
+  getAccountBalance,
+  sendTx
 };
