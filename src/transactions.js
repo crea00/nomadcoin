@@ -37,14 +37,14 @@ class UTxOut {
 
 const getTxId = tx => {
   const txInContent = tx.txIns
-    .map(txIn => txIn.uTxOutId + txIn.txOutIndex)
+    .map(txIn => txIn.txOutId + txIn.txOutIndex)
     .reduce((a, b) => a + b, "");
 
   const txOutContent = tx.txOuts
     .map(txOut => txOut.address + txOut.amount)
     .reduce((a, b) => a + b, "");
 
-  return CryptoJS.SHA256(txInContent + txOutContent).toString();
+  return CryptoJS.SHA256(txInContent + txOutContent + tx.timestamp).toString();
 };
 
 const findUTxOut = (txOutId, txOutIndex, uTxOutList) => {
@@ -58,12 +58,17 @@ const signTxIn = (tx, txInIndex, privateKey, uTxOutList) => {
   const txIn = tx.txIns[txInIndex];
   const dataToSign = tx.id;
   // To Do: Find Tx
-  const referencedUTxOut = findUTxOut(txIn.txOutId, tx.txOutIndex, uTxOutList);
-  if (referencedUTxOut === null) {
+  const referencedUTxOut = findUTxOut(
+    txIn.txOutId,
+    txIn.txOutIndex,
+    uTxOutList
+  );
+  if (referencedUTxOut === null || referencedUTxOut === undefined) {
+    throw Error("Couldn't find the referenced uTxOut, not signing");
     return;
   }
-  const referenceAddress = referencedUTxOut.address;
-  if (getPublicKey(privateKey) !== referenceAddress) {
+  const referencedAddress = referencedUTxOut.address;
+  if (getPublicKey(privateKey) !== referencedAddress) {
     return false;
   }
   // To Do: Sign the txIn
@@ -72,7 +77,7 @@ const signTxIn = (tx, txInIndex, privateKey, uTxOutList) => {
   return signature;
 };
 
-const getPublicKey = (privateKey) => {
+const getPublicKey = privateKey => {
   return ec
     .keyFromPrivate(privateKey, "hex")
     .getPublic()
@@ -104,43 +109,52 @@ const isTxInStructureValid = (txIn) => {
   if (txIn === null) {
     return false;
   } else if (typeof txIn.signature !== "string") {
+    console.log("The txIn doesn't have a valid signature");
     return false;
   } else if (typeof txIn.txOutId !== "string") {
+    console.log("The txIn doesn't have a valid txOutId");
     return false;
   } else if (typeof txIn.txOutIndex !== "number") {
+    console.log("The txIn doesn't have a valid txOutIndex");
     return false;
   } else {
     return true;
   }
 };
 
-const isAddressValid = (address) => {
+const isAddressValid = address => {
   if (address.length !== 130) {
+    console.log("The address length is not the expected one");
     return false;
   } else if (address.match("^[a-fA-F0-9]+$") === null) {
+    console.log("The address doesn't match the hex patter");
     return false;
-  } else if (!address.startWith("04")) {
+  } else if (!address.startsWith("04")) {
+    console.log("The address doesn't start with 04");
     return false;
   } else {
     return true;
   }
-}
+};
 
-const isTxOutStructureValid = (txOut) => {
+const isTxOutStructureValid = txOut => {
   if (txOut === null) {
     return false;
   } else if (typeof txOut.address !== "string") {
+    console.log("The txOut doesn't have a valid string as address");
     return false;
   } else if (!isAddressValid(txOut.address)) {
+    console.log("The txOut doesn't have a valid address");
     return false;
   } else if (typeof txOut.amount !== "number") {
+    console.log("The txOut doesn't have a valid amount");
     return false;
   } else {
     return true;
   }
-}
+};
 
-const isTxStructureValid = (tx) => {
+const isTxStructureValid = tx => {
   if (typeof tx.id !== "string") {
     console.log("Tx ID is not valid");
     return false;
@@ -156,7 +170,7 @@ const isTxStructureValid = (tx) => {
     console.log("The txOuts are not an array");
     return false;
   } else if (
-    !tx.txOut.map(isTxOutStructureValid).reduce((a, b) => a && b, true)
+    !tx.txOuts.map(isTxOutStructureValid).reduce((a, b) => a && b, true)
   ) {
     console.log("The structure of one of the txOut is not valid");
     return false;
@@ -166,8 +180,11 @@ const isTxStructureValid = (tx) => {
 };
 
 const validateTxIn = (txIn, tx, uTxOutList) => {
-  const wantedTxOut = uTxOutList.find(uTxO => uTxO.txOutId === txIn.txOutId && uTxO.txOutIndex === txIn.txOutIndex);
+  const wantedTxOut = uTxOutList.find(
+    uTxO => uTxO.txOutId === txIn.txOutId && uTxO.txOutIndex === txIn.txOutIndex
+  );
   if (wantedTxOut === null) {
+    console.log(`Didn't find the wanted uTxOut, the tx: ${tx} is invalid`);
     return false;
   } else {
     const address = wantedTxOut.address;
@@ -180,18 +197,22 @@ const getAmountInTxIn = (txIn, uTxOutList) =>
   findUTxOut(txIn.txOutId, txIn.txOutIndex, uTxOutList).amount;
 
 const validateTx = (tx, uTxOutList) => {
-
   if (!isTxStructureValid(tx)) {
+    console.log("Tx structure is invalid");
     return false;
   }
 
   if (getTxId(tx) !== tx.id) {
+    console.log("Tx ID is not valid");
     return false;
   }
 
-  const hasValidTxIns = tx.txIns.map(txIn => validateTxIn(txIn, tx, uTxOutList));
+  const hasValidTxIns = tx.txIns.map(txIn =>
+    validateTxIn(txIn, tx, uTxOutList)
+  );
 
   if (!hasValidTxIns) {
+    console.log(`The tx: ${tx} doesn't have valid txIns`);
     return false;
   }
 
@@ -204,22 +225,36 @@ const validateTx = (tx, uTxOutList) => {
     .reduce((a, b) => a + b, 0);
 
   if (amountInTxIns !== amountInTxOuts) {
+    console.log(
+      `The tx: ${tx} doesn't have the same amount in the txOut as in the txIns`
+    );
     return false;
   } else {
-    return false;
+    return true;
   }
 };
 
 const validateCoinbaseTx = (tx, blockIndex) => {
   if (getTxId(tx) !== tx.id) {
+    console.log("Invalid Coinbase tx ID");
     return false;
   } else if (tx.txIns.length !== 1) {
+    console.log("Coinbase TX should only have one input");
     return false;
   } else if (tx.txIns[0].txOutIndex !== blockIndex) {
+    console.log(
+      "The txOutIndex of the Coinbase Tx should be the same as the Block Index"
+    );
     return false;
   } else if (tx.txOuts.length !== 1) {
+    console.log("Coinbase TX should only have one output");
     return false;
   } else if (tx.txOuts[0].amount !== COINBASE_AMOUNT) {
+    console.log(
+      `Coinbase TX should have an amount of only ${COINBASE_AMOUNT} and it has ${
+      tx.txOuts[0].amount
+      }`
+    );
     return false;
   } else {
     return true;
@@ -238,24 +273,26 @@ const createCoinbaseTx = (address, blockIndex) => {
   return tx;
 };
 
-const hasDuplicates = (txIns) => {
+const hasDuplicates = txIns => {
   const groups = _.countBy(txIns, txIn => txIn.txOutId + txIn.txOutIndex);
 
-  return _(groups).map(value => {
-    // To prevent double spending 
-    if (value > 1) {
-      console.log("Found a duplicated txIn");
-      return true;
-    } else {
-      return false;
-    }
-  }).includes(true);
+  return _(groups)
+    .map(value => {
+      // To prevent double spending 
+      if (value > 1) {
+        console.log("Found a duplicated txIn");
+        return true;
+      } else {
+        return false;
+      }
+    })
+    .includes(true);
 }
 
 const validateBlockTxs = (txs, uTxOutList, blockIndex) => {
   const coinbaseTx = txs[0];
   if (!validateCoinbaseTx(coinbaseTx, blockIndex)) {
-    return false;
+    console.log("Coinbase Tx is invalid");
   }
 
   const txIns = _(txs)

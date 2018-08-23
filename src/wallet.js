@@ -55,7 +55,7 @@ const findAmountInUTxOuts = (amountNeeded, myUTxOuts) => {
   const includedUTxOuts = [];
   for (const myUTxOut of myUTxOuts) {
     includedUTxOuts.push(myUTxOut);
-    currentAmount = currentAmount + myUTxOut.amount;
+    currentAmount = currentAmount = myUTxOut.amount;
     if (currentAmount >= amountNeeded) {
       const leftOverAmount = currentAmount - amountNeeded;
       return { includedUTxOuts, leftOverAmount };
@@ -71,7 +71,7 @@ const createTxOuts = (receiverAddress, myAddress, amount, leftOverAmount) => {
     return [receiverTxOut];
   } else {
     const leftOverTxOut = new TxOut(myAddress, leftOverAmount);
-    return [receiverTxOut, leftOverAmount];
+    return [receiverTxOut, leftOverTxOut];
   }
 };
 
@@ -87,9 +87,9 @@ const createTx = (receiverAddress, amount, privateKey, uTxOutList) => {
   const toUnsignedTxIn = uTxOut => {
     const txIn = new TxIn();
     txIn.txOutId = uTxOut.txOutId;
-    tx.txOutIndex = uTxOut.txOutIndex;
+    txIn.txOutIndex = uTxOut.txOutIndex;
     return txIn;
-  }
+  };
 
   const unsignedTxIns = includedUTxOuts.map(toUnsignedTxIn);
 
@@ -104,6 +104,7 @@ const createTx = (receiverAddress, amount, privateKey, uTxOutList) => {
     txIn.signature = signTxIn(tx, index, privateKey, uTxOutList);
     return txIn;
   });
+
   return tx;
 };
 

@@ -35,20 +35,18 @@ app.post("/peers", (req, res) => {
 app.get("/me/balance", (req, res) => {
   const balance = getAccountBalance();
   res.send({ balance });
-})
+});
 
 app.route("/transactions")
-  .get((req, res) => {
-
-  })
+  .get((req, res) => { })
   .post((req, res) => {
     try {
       const { body: { address, amount } } = req;
       if (address === undefined || amount === undefined) {
         throw Error("Please specift and address an amount");
       } else {
-        const res = sendTx(address, amount);
-        res.send(res);
+        const resPonse = sendTx(address, amount);
+        res.send(resPonse);
       }
     } catch (e) {
       res.status(400).send(e.message);

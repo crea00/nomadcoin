@@ -31,7 +31,7 @@ const getAll = () => {
   };
 };
 
-const blockchainResponse = (data) => {
+const blockchainResponse = data => {
   return {
     type: BLOCKCHAIN_RESPONSE,
     data
@@ -77,10 +77,10 @@ const handleSocketMessages = ws => {
     console.log(message);
     switch (message.type) {
       case GET_LATEST:
-        sendMessage(ws, responseAll());
+        sendMessage(ws, responseLatest());
         break;
       case GET_ALL:
-        sendMessage(ws, responseLatest());
+        sendMessage(ws, responseAll());
         break;
       case BLOCKCHAIN_RESPONSE:
         const receivedBlocks = message.data;
@@ -119,6 +119,7 @@ const handleBlockchainResponse = receivedBlocks => {
 };
 
 const sendMessage = (ws, message) => ws.send(JSON.stringify(message));
+
 const sendMessageToAll = message =>
   sockets.forEach(ws => sendMessage(ws, message));
 
