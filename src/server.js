@@ -43,7 +43,7 @@ app.route("/transactions")
     try {
       const { body: { address, amount } } = req;
       if (address === undefined || amount === undefined) {
-        throw Error("Please specift and address an amount");
+        throw Error("Please specify and address an amount");
       } else {
         const resPonse = sendTx(address, amount);
         res.send(resPonse);
@@ -51,7 +51,7 @@ app.route("/transactions")
     } catch (e) {
       res.status(400).send(e.message);
     }
-  })
+  });
 
 const server = app.listen(PORT, () =>
   console.log(`Nomadcoin HTTP Server running on port ${PORT}`)

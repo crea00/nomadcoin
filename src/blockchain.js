@@ -1,7 +1,7 @@
 const CryptoJS = require("crypto-js"),
   _ = require("lodash"),
   Wallet = require("./wallet"),
-  Mempool = require("./mempool"),
+  Mempool = require("./memPool"),
   Transactions = require("./transactions"),
   hexToBinary = require("hex-to-binary");
 
@@ -257,7 +257,13 @@ const getAccountBalance = () =>
   getBalance(getPublicFromWallet(), uTxOuts);
 
 const sendTx = (address, amount) => {
-  const tx = createTx(address, amount, getPrivateFromWallet(), getUTxOutList());
+  const tx = createTx(
+    address,
+    amount,
+    getPrivateFromWallet(),
+    getUTxOutList(),
+    getMempool()
+  );
   addToMempool(tx, getUTxOutList());
   return tx;
 };

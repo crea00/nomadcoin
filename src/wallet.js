@@ -18,8 +18,8 @@ const ec = new elliptic.ec("secp256k1");
 const privateKeyLocation = path.join(__dirname, "privateKey");
 
 const generatePrivateKey = () => {
-  const KeyPair = ec.genKeyPair();
-  const privateKey = KeyPair.getPrivate();
+  const keyPair = ec.genKeyPair();
+  const privateKey = keyPair.getPrivate();
   return privateKey.toString(16);
 };
 
@@ -80,31 +80,33 @@ const filterUTxOutsFromMempool = (uTxOutList, mempool) => {
   const txIns = _(mempool)
     .map(tx => tx.txIns)
     .flatten()
-    .values();
+    .value();
 
-    const removables = [];
+  const removables = [];
 
-  for(const uTxOut of uTxOutList) {
+  for (const uTxOut of uTxOutList) {
     const txIn = _.find(
-      txIns, txIn => 
-        txIn.txOutIndex === uTxOut.txOuIndex && 
+      txIns, txIn =>
+        txIn.txOutIndex === uTxOut.txOuIndex &&
         txIn.txOutId === uTxOut.txOutId
     );
-    if(!txIn === undefined) {
-      removables.push(txIn);
+    if (txIn !== undefined) {
+      removables.push(uTxOut);
     }
   }
 
   return _.without(uTxOutList, ...removables);
 };
 
-const createTx = (receiverAddress, amount, privateKey, uTxOutList) => {
+const createTx = (receiverAddress, amount, privateKey, uTxOutList, memPool) => {
   const myAddress = getPublicKey(privateKey);
   const myUTxOuts = uTxOutList.filter(uTxO => uTxO.address === myAddress);
 
+  const filteredUTxOuts = filterUTxOutsFromMempool(myUTxOuts, memPool);
+
   const { includedUTxOuts, leftOverAmount } = findAmountInUTxOuts(
     amount,
-    myUTxOuts
+    filteredUTxOuts
   );
 
   const toUnsignedTxIn = uTxOut => {

@@ -107,6 +107,7 @@ const updateUTxOuts = (newTxs, uTxOutList) => {
 
 const isTxInStructureValid = (txIn) => {
   if (txIn === null) {
+    console.log("The txIn appears to be null");
     return false;
   } else if (typeof txIn.signature !== "string") {
     console.log("The txIn doesn't have a valid signature");
@@ -287,7 +288,7 @@ const hasDuplicates = txIns => {
       }
     })
     .includes(true);
-}
+};
 
 const validateBlockTxs = (txs, uTxOutList, blockIndex) => {
   const coinbaseTx = txs[0];
